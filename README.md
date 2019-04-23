@@ -1,4 +1,4 @@
-#使用百度AI 来完成多重登陆验证
+使用百度AI 来完成多重登陆验证
 
 安装依赖 pip install -r requirements.txt
 
