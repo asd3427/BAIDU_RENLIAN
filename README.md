@@ -1,4 +1,4 @@
-#使用百度AI 来完成多重登陆验证
+# 使用百度AI 来完成多重登陆验证
 
 `安装依赖 pip install -r requirements.txt `
 
@@ -12,8 +12,8 @@
 在face.py里需要注意以下两点
 
 1.这部份需要替换成你的百度AI 的资料
-`
-face = AipFace(appId='16058688', apiKey="AyGxQXLmWTfftUueyVSyjVVe",
+
+`face = AipFace(appId='16058688', apiKey="AyGxQXLmWTfftUueyVSyjVVe",
                secretKey="oPR4BQ5sdhUwvxxsClUxWTpIeqf8dTXW")`
 
 2.这部份也需要注意这里的类名一定要记得还要注意类名不能使用中文!!
@@ -28,12 +28,12 @@ face = AipFace(appId='16058688', apiKey="AyGxQXLmWTfftUueyVSyjVVe",
 ##注意所有拍摄的资料都会在上传以及识别后删除
 TODO:
 
-1.优化代码
+* 1.优化代码
 
-2.资料资料库支持密码验证的功能
+* 2.资料资料库支持密码验证的功能
 
-3.增加指纹识别功能
+* 3.增加指纹识别功能
 
-4.资家身份证识别功能
+* 4.资家身份证识别功能
 
-5.将代码界面化 并打包成EXE
+* 5.将代码界面化 并打包成EXE
