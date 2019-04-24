@@ -9,7 +9,7 @@ face = AipFace(appId='16058688', apiKey="AyGxQXLmWTfftUueyVSyjVVe",
                secretKey="oPR4BQ5sdhUwvxxsClUxWTpIeqf8dTXW")
 
 
-class search:
+class Search:
     def __init__(self):
         pass
 
@@ -64,7 +64,7 @@ class search:
 
     @staticmethod
     def search(user_class):
-        for i in range(0, 10, 1):
+        for i in range(0, 11, 1):
             file_name = r'%s%i.jpg' % (user_class, i)
             f = open(file_name, 'rb')
 
@@ -73,8 +73,15 @@ class search:
             img1 = base64.b64encode(f.read())
             search_in_baidu = face.search(group_id_list=user_class, image=str(img1, 'utf-8'), image_type="BASE64")
             if search_in_baidu['error_code'] == 0:
+                result = search_in_baidu['result']
+                class_name = result['user_list'][0]['group_id']
+                user_name = result['user_list'][0]['user_id']
+                print('组别名称%s使用者名称%s' % (class_name, user_name))
                 f.close()
                 try:
+
+                    print(search_in_baidu)
+                    print()
                     print('匹配成功5秒后删除图片%s' % file_name)
                     time.sleep(5)
                     os.remove(file_name)
@@ -87,5 +94,5 @@ class search:
 # todo 优化代码
 
 
-a = search()
+a = Search()
 a.paizhao()

@@ -9,7 +9,7 @@ face = AipFace(appId='16058688', apiKey="AyGxQXLmWTfftUueyVSyjVVe",
                secretKey="oPR4BQ5sdhUwvxxsClUxWTpIeqf8dTXW")
 
 
-class face_chick:
+class FaceChick:
     def __init__(self):
         pass
 
@@ -17,7 +17,7 @@ class face_chick:
         save_path = "img"
 
         face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-        eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
+        eye_cascade = cv2.CascadeClassnifier('haarcascade_eye.xml')
 
         face_cascade.load('D:\python\Lib\site-packages\cv2\data\haarcascade_frontalface_default.xml')
         eye_cascade.load('D:\python\Lib\site-packages\cv2\data\haarcascade_eye.xml')
@@ -97,5 +97,5 @@ class face_chick:
             print(e)
 
 
-a = face_chick()
+a = FaceChick()
 a.face_eye()
