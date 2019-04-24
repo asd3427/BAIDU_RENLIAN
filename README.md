@@ -25,6 +25,13 @@
 
 `search_in_baidu = face.search(group_id_list=user_class, image=str(img1, 'utf-8'), image_type="BASE64")`
 
+search_baidu 输出如下
+
+`组别名称test使用者名称chen相似度97.488624572754
+
+匹配成功5秒后删除图片test0.jpg
+`
+
 ## 注意所有拍摄的资料都会在上传以及识别后删除
 TODO:
 
