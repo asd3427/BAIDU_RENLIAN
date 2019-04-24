@@ -53,7 +53,9 @@ class Search:
                 i += 1
                 for (ex, ey, ew, eh) in eyes:
                     cv2.rectangle(roi_color, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 2)
-
+            cv2.imshow('img', img)
+            if cv2.waitKey(30) & 0xFF == ord('q'):  # 获取多张图片直到你按停止
+                break
             if i > 10:
                 break
 
@@ -72,23 +74,22 @@ class Search:
             # group_id_list 这里需要说明一下 这是指 人脸库 >>用户组 要输入用户组的名称且用户组名称不能为中文否则会报错
             img1 = base64.b64encode(f.read())
             search_in_baidu = face.search(group_id_list=user_class, image=str(img1, 'utf-8'), image_type="BASE64")
-            if search_in_baidu['error_code'] == 0:
-                result = search_in_baidu['result']
+
+            result = search_in_baidu['result']
+            score = result['user_list'][0]['score']
+            if score >= 90:
                 class_name = result['user_list'][0]['group_id']
                 user_name = result['user_list'][0]['user_id']
-                print('组别名称%s使用者名称%s' % (class_name, user_name))
+                print('组别名称%s使用者名称%s相似度%s' % (class_name, user_name, score))
                 f.close()
                 try:
-
-                    print(search_in_baidu)
-                    print()
                     print('匹配成功5秒后删除图片%s' % file_name)
                     time.sleep(5)
                     os.remove(file_name)
                 except:
                     pass
             else:
-                print('你不是本人噢请不要乱来')
+                print('你不是本人噢请不要乱来相似度过低%s' % score)
 
 
 # todo 优化代码
