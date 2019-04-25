@@ -4,6 +4,7 @@ import base64
 import sys
 import os
 import shutil
+import sqlite3
 
 face = AipFace(appId='16058688', apiKey="AyGxQXLmWTfftUueyVSyjVVe",
                secretKey="oPR4BQ5sdhUwvxxsClUxWTpIeqf8dTXW")
@@ -17,10 +18,10 @@ class FaceChick:
         save_path = "img"
 
         face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-        eye_cascade = cv2.CascadeClassnifier('haarcascade_eye.xml')
+        eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
 
-        face_cascade.load('D:\python\Lib\site-packages\cv2\data\haarcascade_frontalface_default.xml')
-        eye_cascade.load('D:\python\Lib\site-packages\cv2\data\haarcascade_eye.xml')
+        face_cascade.load('./data\haarcascade_frontalface_default.xml')
+        eye_cascade.load('./data\haarcascade_eye.xml')
 
         cap = cv2.VideoCapture(0)
         user_conter = input("是否要注册 Y or N :")
@@ -65,7 +66,34 @@ class FaceChick:
 
         cv2.destroyAllWindows()
         print("感谢%s完成注册您的密码是%s您的组名是%s" % (user_name, user_pwd, class_name))
+        self.add_to_database(user_name=class_name, user_pwd=user_pwd, class_name=class_name)
         self.add_to_baidu(class_name=class_name, user_name=user_name)
+
+    @staticmethod
+    def add_to_database(user_name, user_pwd, class_name):
+        """
+        建立资料库，新增使用者资料到资料库
+        :param user_name:
+        :param user_pwd:
+        :param class_name:
+        :return:
+        """
+        conn = sqlite3.connect('user_info.db')
+        params = (user_name, user_pwd, class_name)
+        c = conn.cursor()
+        try:
+            c.execute('''CREATE TABLE USER_INFO
+                   (
+                   NAME                  TEXT    NOT NULL,
+                   PASSWORD              CHAR(50)     NOT NULL,
+                   USER_CLASS            CHAR(50));''')
+
+        except Exception as e:
+            print(e, '资料库已存在')
+
+        conn.execute("INSERT INTO USER_INFO VALUES (?,?,?)", params)
+        conn.commit()
+        conn.close()
 
     @staticmethod
     def add_to_baidu(class_name, user_name):

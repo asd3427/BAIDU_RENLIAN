@@ -4,6 +4,7 @@ import base64
 import sys
 import os
 import time
+import sqlite3
 
 face = AipFace(appId='16058688', apiKey="AyGxQXLmWTfftUueyVSyjVVe",
                secretKey="oPR4BQ5sdhUwvxxsClUxWTpIeqf8dTXW")
@@ -14,18 +15,32 @@ class Search:
         pass
 
     def password(self):
+        user_name = input('请输入使用者名称')
         password = input('请输入登录密码')
+        conn = sqlite3.connect('user_info.db')
+        params = (user_name, password)
+
+        check_user = conn.execute(
+            "SELECT NAME, PASSWORD FROM USER_INFO WHERE  NAME=? and PASSWORD=?", params)
+        check = [i for i in check_user]
+        if len(check) is not 0:
+            return True
 
     def paizhao(self):
+        pwd_check = self.password()
+        if pwd_check is not True:
+            print('登陆失败请重试')
+            sys.exit()
 
+        print('账号密码验证成功')
         face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
         eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
 
-        face_cascade.load('D:\python\Lib\site-packages\cv2\data\haarcascade_frontalface_default.xml')
-        eye_cascade.load('D:\python\Lib\site-packages\cv2\data\haarcascade_eye.xml')
+        face_cascade.load('./data\haarcascade_frontalface_default.xml')
+        eye_cascade.load('./data\haarcascade_eye.xml')
 
         cap = cv2.VideoCapture(0)
-        user_conter = input("是否要登陆 Y or N :")
+        user_conter = input("是否要进行脸部验证 Y or N :")
 
         if user_conter is not 'Y':
             sys.exit()
@@ -74,22 +89,25 @@ class Search:
             # group_id_list 这里需要说明一下 这是指 人脸库 >>用户组 要输入用户组的名称且用户组名称不能为中文否则会报错
             img1 = base64.b64encode(f.read())
             search_in_baidu = face.search(group_id_list=user_class, image=str(img1, 'utf-8'), image_type="BASE64")
+            print(search_in_baidu)
 
-            result = search_in_baidu['result']
-            score = result['user_list'][0]['score']
-            if score >= 90:
-                class_name = result['user_list'][0]['group_id']
-                user_name = result['user_list'][0]['user_id']
-                print('组别名称%s使用者名称%s相似度%s' % (class_name, user_name, score))
-                f.close()
-                try:
-                    print('匹配成功5秒后删除图片%s' % file_name)
-                    time.sleep(5)
-                    os.remove(file_name)
-                except:
-                    pass
-            else:
-                print('你不是本人噢请不要乱来相似度过低%s' % score)
+            if search_in_baidu['error_code'] == 0:
+                result = search_in_baidu['result']
+                score = result['user_list'][0]['score']
+                if score >= 90:
+                    class_name = result['user_list'][0]['group_id']
+                    user_name = result['user_list'][0]['user_id']
+                    print('组别名称%s使用者名称%s相似度%s' % (class_name, user_name, score))
+                    f.close()
+                    try:
+                        print('匹配成功5秒后删除图片%s' % file_name)
+                        time.sleep(5)
+                        os.remove(file_name)
+                    except Exception as e:
+                        print(e)
+                        pass
+                else:
+                    print('你不是本人噢请不要乱来相似度过低%s' % score)
 
 
 # todo 优化代码
