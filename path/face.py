@@ -48,7 +48,7 @@ class FaceChick:
                 roi_gray = gray[y:y + h, x:x + w]
                 roi_color = img[y:y + h, x:x + w]
                 eyes = eye_cascade.detectMultiScale(roi_gray)
-                save_path = save_path + user_name
+
                 cv2.imwrite(user_name + '\\' + user_name + str(i) + '.jpg', img[y:y + h, x:x + w],
                             [int(cv2.IMWRITE_JPEG_QUALITY), 1000])
                 i += 1
@@ -66,7 +66,7 @@ class FaceChick:
 
         cv2.destroyAllWindows()
         print("感谢%s完成注册您的密码是%s您的组名是%s" % (user_name, user_pwd, class_name))
-        self.add_to_database(user_name=class_name, user_pwd=user_pwd, class_name=class_name)
+        self.add_to_database(user_name=user_name, user_pwd=user_pwd, class_name=class_name)
         self.add_to_baidu(class_name=class_name, user_name=user_name)
 
     @staticmethod
