@@ -5,9 +5,12 @@ import sys
 import os
 import shutil
 import sqlite3
+from aip import AipImageSearch
 
 face = AipFace(appId='16058688', apiKey="AyGxQXLmWTfftUueyVSyjVVe",
                secretKey="oPR4BQ5sdhUwvxxsClUxWTpIeqf8dTXW")
+image_search = AipImageSearch(appId='16058688', apiKey="AyGxQXLmWTfftUueyVSyjVVe",
+                              secretKey="oPR4BQ5sdhUwvxxsClUxWTpIeqf8dTXW")
 
 
 class FaceChick:
@@ -69,6 +72,8 @@ class FaceChick:
         self.add_to_database(user_name=user_name, user_pwd=user_pwd, class_name=class_name)
         self.add_to_baidu(class_name=class_name, user_name=user_name)
 
+    # self.upload_image(user_name=user_name) # 这块功能未启用 百度要求实名认证 无法玩成
+
     @staticmethod
     def add_to_database(user_name, user_pwd, class_name):
         """
@@ -123,6 +128,23 @@ class FaceChick:
             shutil.rmtree(r'.\%s' % user_name)  # todo 优化代码
         except Exception as e:
             print(e)
+
+    @staticmethod
+    def upload_image(user_name):  # todo 等待实名认证资料
+        print("提示请先将文件放置于 upload 资料夹内")
+        user_conter = input('您是否放置完成 Y or N:')
+        if user_conter is not "Y":
+            print('您选择不上传证件')
+            sys.exit()
+        file_names = os.listdir('upload')
+        for file_name in file_names:
+            with open('./upload/%s' % file_name, 'rb') as fp:
+                image = fp.read()
+                print('读取成功%s' % file_name)
+                options = {}
+                options["brief"] = {"name": user_name}
+                s = image_search.similarAdd(image=image, options=options)
+                print(s)
 
 
 a = FaceChick()

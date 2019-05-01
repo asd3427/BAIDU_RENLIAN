@@ -6,9 +6,12 @@ import os
 import time
 import sqlite3
 import shutil
+from aip import AipImageSearch
 
 face = AipFace(appId='16058688', apiKey="AyGxQXLmWTfftUueyVSyjVVe",
                secretKey="oPR4BQ5sdhUwvxxsClUxWTpIeqf8dTXW")
+image_search = AipImageSearch(appId='16058688', apiKey="AyGxQXLmWTfftUueyVSyjVVe",
+                              secretKey="oPR4BQ5sdhUwvxxsClUxWTpIeqf8dTXW")
 
 
 class Search:
@@ -112,12 +115,11 @@ class Search:
 
                     if k == 3:
 
-
                         print('成功比配3次')
                         del_ = input('比对完成 您是否要删除这比资料 请输入 Y or N :')
                         if del_ == 'Y':
                             group_id, user_id = input('请出入需要删除的 "组名"和 "使用者名称": ').split(',')
-                            self.del_data(group_id=group_id, user_id=user_id)
+                            self.del_face_data(group_id=group_id, user_id=user_id)
                         else:
                             print('您选择不删除')
                             break
@@ -135,8 +137,17 @@ class Search:
             print(e)
         sys.exit()
 
+    def search_sim_image(self):  # todo 等待实名认证资料
+        file_names = os.listdir('image_search')
+        for file_name in file_names:
+            with open('./upload/%s' % file_name, 'rb') as f:
+                image = f.read()
+                search_image = image_search.similarSearch(image=image)
+                f.close()
+                print(search_image)
+
     @staticmethod
-    def del_data(group_id, user_id):
+    def del_face_data(group_id, user_id):
         """
         删除百度人脸库里里面指定用户
         :param group_id: 使用者的组名为注册时的user_class EX:test
