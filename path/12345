@@ -1,0 +1,85 @@
+import pyautogui as pag
+import time
+import win32clipboard as wc
+import pandas as pd
+from win32.lib import win32con
+
+
+def get_Position():
+    while True:
+        x, y = pag.position()  # 返回鼠标的坐标
+        posStr = "Position:" + str(x).rjust(4) + ',' + str(y).rjust(4)
+        print(posStr)  # 打印坐标
+        time.sleep(0.2)
+        # os.system('cls')#清楚屏幕
+
+
+def start():
+    wait_time = int(input('請輸入等待時間'))
+    fist = input('請輸入座標用逗號').split(',')
+    second = input('請輸入第二個座標').split(',')
+    print('開始複製')
+    print(fist)
+    pag.moveTo(int(fist[0]), int(fist[1]))
+    pag.rightClick()
+    time.sleep(2)
+    pag.moveTo(int(second[0]), int(second[1]))
+    time.sleep(3)
+    pag.leftClick()
+    print('等待複製完成您設置%d秒' % wait_time)
+    time.sleep(wait_time)
+    pag.press('enter')
+    print('複製完成等待3秒')
+    print('自動切換到下一各股票')
+
+    time.sleep(1)
+    pag.press('pgdn')
+
+
+# def handle_window(hwnd, extra):
+#     if win32gui.IsWindowVisible(hwnd):
+#
+#         if 'SysPower' in win32gui.GetWindowText(hwnd):
+#             win32gui.PostMessage(hwnd, win32con.WM_CLOSE, 0, 0)
+#         else:
+#             return 2
+#
+#
+# if __name__ == '__main__':
+#     win32gui.EnumWindows(handle_window, None)
+#    todo 根據句炳來做下一頁得動作
+
+
+def getCopyText(stock_ID):
+    starts = start()
+
+    wc.OpenClipboard()
+    copy_text = wc.GetClipboardData(win32con.CF_TEXT)
+    data = pd.read_clipboard('encoding = utf-8')
+    data.to_excel('{}D.xlsx'.format(stock_ID))
+    time.sleep(2)
+    wc.OpenClipboard()
+    wc.EmptyClipboard()  # 清空
+    print('寫入完成如果可能請自檢查是否寫入成功!!!!')
+
+
+# #
+if __name__ == "__main__":
+
+    while True:
+        print('目前為測試階段')
+        choies = int(input('請輸入您要執行哪個1.獲取座標,2.開始複製與寫入'))
+        if choies == 1:
+            try:
+                print("Press Ctrl-C to end")
+                get_Position = get_Position()
+            except  KeyboardInterrupt:
+                print('end....')
+
+        elif choies == 2:
+
+            stock_ID = str(input('輸入股票ID'))
+            getCopyText(stock_ID=stock_ID)
+
+        else:
+            break
