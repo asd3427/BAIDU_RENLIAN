@@ -7,6 +7,7 @@ import shutil
 import sqlite3
 from aip import AipImageSearch, AipOcr
 import re
+import time
 
 face = AipFace(appId='16058688', apiKey="AyGxQXLmWTfftUueyVSyjVVe",
                secretKey="oPR4BQ5sdhUwvxxsClUxWTpIeqf8dTXW")
@@ -75,8 +76,6 @@ class FaceChick:
         self.add_to_database(user_name=user_name, user_pwd=user_pwd, class_name=class_name, idcardinfo=idcardinfo)
         self.add_to_baidu(class_name=class_name, user_name=user_name)
 
-        self.upload_image(user_name=user_name)  # 这块功能未启用 百度要求实名认证 无法玩成
-
     @staticmethod
     def add_to_database(user_name, user_pwd, class_name, idcardinfo):
         """
@@ -103,7 +102,7 @@ class FaceChick:
                    Id_Card_name CHAR(30),
                    Id_Card_num CHAR(30),
                    Id_Card_give_date CHAR(30))
-                   
+
                    ;''')
 
         except Exception as e:
@@ -136,34 +135,12 @@ class FaceChick:
             else:
                 f.close()
                 print(s['error_msg'])
+            time.sleep(1)
         try:
             print('删除资料夹')
             shutil.rmtree(r'.\%s' % user_name)  # todo 优化代码
         except Exception as e:
             print(e)
-
-    @staticmethod
-    def upload_image(user_name):  # todo 等待实名认证资料
-        print("提示请先将文件放置于 upload 资料夹内")
-
-        file_names = os.listdir('upload')
-        if len(file_names) is 0:
-            print('未将图片放置到指定资料夹')
-            sys.exit()
-        for file_name in file_names:
-            if user_name in file_name:
-                print(1)
-            else:
-                print(file_name)
-                # with open('./upload/%s' % file_name, 'rb') as fp:
-                #     image = fp.read()
-                #     print('读取成功%s' % file_name)
-                #     options = {}
-                #     options["brief"] = {user_name}
-                #     result = image_search.similarAdd(image=image, options=options)
-                #     fp.close()
-                #     if 'error_msg' not in result:
-                #         print('恭喜你完成所有认证')
 
     def ocr_image(self):
         print('入庫身分證資料')
@@ -185,10 +162,12 @@ class FaceChick:
             for i in ret:
                 cd += i['words']
 
-            # cd = '米中華民國國民身分證姓名陳曙光出生民國81年5月12日年月日性别男發證日期民100年3月14日(中市)换發L190002001'
             name = re.findall('姓名(\w{3})', cd)[0]  # '^[\u4e00-\u9fa5_a-zA-Z0-9]+$'
             ids = re.findall('發(\w{10})', cd)[1]
             give_date = re.findall('發證日期(\w+)*', cd)[0]
+            fp.close()
+            print('刪除身分證資料')
+            os.remove(r'./search/{}'.format(image_names[0]))
             return [name, ids, give_date]
         except Exception as e:
             print(e)

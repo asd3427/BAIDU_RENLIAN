@@ -185,8 +185,11 @@ class Search:
                 "SELECT Id_Card_name, Id_Card_num FROM USER_INFO WHERE  Id_Card_name like ? and Id_Card_num like ?",
                 params)
             datas = check_user.fetchall()
+            fp.close()
+            print('刪除身分證資料')
+            os.remove(r'./search/{}'.format(image_names[0]))
             if not datas:
-                return False
+                return [False]
             return [True,datas[0][0]]
 
 
