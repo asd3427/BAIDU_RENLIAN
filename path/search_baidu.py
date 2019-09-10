@@ -6,12 +6,15 @@ import os
 import time
 import sqlite3
 import shutil
-from aip import AipImageSearch
+from aip import AipImageSearch, AipOcr
+import re
 
 face = AipFace(appId='16058688', apiKey="AyGxQXLmWTfftUueyVSyjVVe",
                secretKey="oPR4BQ5sdhUwvxxsClUxWTpIeqf8dTXW")
 image_search = AipImageSearch(appId='16058688', apiKey="AyGxQXLmWTfftUueyVSyjVVe",
                               secretKey="oPR4BQ5sdhUwvxxsClUxWTpIeqf8dTXW")
+ocr = AipOcr(appId='16058688', apiKey="AyGxQXLmWTfftUueyVSyjVVe",
+             secretKey="oPR4BQ5sdhUwvxxsClUxWTpIeqf8dTXW")
 
 
 class Search:
@@ -34,6 +37,10 @@ class Search:
             return [False]
 
     def paizhao(self):
+        """
+        pwd_check 0 is T or F 1 is username
+        :return:
+        """
         pwd_check = self.password()
         try:
             if pwd_check[0] is not True:
@@ -41,8 +48,12 @@ class Search:
                 sys.exit()
         except Exception as e:
             print(e)
-
         print('账号密码验证成功')
+        search_sfz = self.search_sfz()
+        if search_sfz[0] is not True:
+            print('身份证认证失败')
+            sys.exit()
+        print('{} 身份证验证成功'.format(search_sfz[1]))
         face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
         eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
 
@@ -101,8 +112,9 @@ class Search:
             img1 = base64.b64encode(file_name.read())
             options = {}
             options['user_id'] = user_name
-            search_in_baidu = face.search(group_id_list=user_class, image=str(img1, 'utf-8'), image_type="BASE64")
-            print(search_in_baidu)
+            search_in_baidu = face.search(group_id_list=user_class, image=str(img1, 'utf-8'), image_type="BASE64",
+                                          options=options)
+            # print(search_in_baidu)
             file_name.close()
             if search_in_baidu['error_code'] == 0:
                 result = search_in_baidu['result']
@@ -123,13 +135,13 @@ class Search:
                         else:
                             print('您选择不删除')
                             break
-
-
-
                 else:
                     print('你不是本人噢请不要乱来相似度过低%s' % score)
                     file_name.close()
                     sys.exit()
+            else:
+                print(search_in_baidu['error_msg'])
+
         try:
             print('删除资料夹')
             shutil.rmtree(r'.\%s' % user_class)  # todo 优化代码
@@ -137,14 +149,50 @@ class Search:
             print(e)
         sys.exit()
 
-    def search_sim_image(self):  # todo 等待实名认证资料
-        file_names = os.listdir('image_search')
-        for file_name in file_names:
-            with open('./upload/%s' % file_name, 'rb') as f:
-                image = f.read()
-                search_image = image_search.similarSearch(image=image)
-                f.close()
-                print(search_image)
+    #@staticmethod
+    def search_sfz(self):
+        """
+        搜寻身份证图片
+        :return: True
+        """
+        print('入庫身分證資料')
+        image_names = os.listdir('search/')
+        if not image_search:
+            print('找不到圖片')
+            return False
+        try:
+            with open(r'./search/{}'.format(image_names[0]), 'rb') as fp:
+                image = fp.read()
+
+            """ 调用通用文字识别, 图片参数为本地图片 """
+            options = {}
+            options["detect_direction"] = "true"
+            # options["probability"] = "true"
+            a = ocr.basicAccurate(image, options=options)
+            cd = ''
+            ret = (a['words_result'])
+            for i in ret:
+                cd += i['words']
+
+            # cd = '米中華民國國民身分證姓名陳曙光出生民國81年5月12日年月日性别男發證日期民100年3月14日(中市)换發L190002001'
+            name = re.findall('姓名(\w{3})', cd)[0]  # '^[\u4e00-\u9fa5_a-zA-Z0-9]+$'
+            ids = re.findall('發(\w{10})', cd)[1]
+            give_date = re.findall('發證日期(\w+)*', cd)[0]
+
+            conn = sqlite3.connect('user_info.db')
+            params = (name, ids)
+            check_user = conn.execute(
+                "SELECT Id_Card_name, Id_Card_num FROM USER_INFO WHERE  Id_Card_name like ? and Id_Card_num like ?",
+                params)
+            datas = check_user.fetchall()
+            if not datas:
+                return False
+            return [True,datas[0][0]]
+
+
+        except Exception as e:
+            print(e)
+            return False
 
     @staticmethod
     def del_face_data(group_id, user_id):
